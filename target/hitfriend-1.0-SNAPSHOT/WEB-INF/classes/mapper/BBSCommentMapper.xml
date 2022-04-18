@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hitfriend.dc.mapper.BBSCommentMapper">
+    <resultMap type="BBSComment" id="baseCommentMap">
+        <id column="com_id" property="ComId"></id>
+        <result column="com_content" property="ComContent"></result>
+        <result column="com_user_id" property="user.id"></result>
+        <result column="com_time" property="ComTime"></result>
+        <result column="com_art_id" property="ComArtId"></result>
+        <result column="nickName" property="user.nickName"></result>
+        <result column="avatarUrl" property="user.avatarUrl"></result>
+    </resultMap>
+    <select id="getCommentByArtIdCount" resultType="int">
+        select count(*)
+        from bbs_comment
+        where com_art_id=#{articleId}
+    </select>
+    <select id="getCommentByArtId" resultMap="baseCommentMap">
+        select c.com_id,c.com_content,c.com_art_id,c.com_user_id,c.com_time,
+        u.nickName,u.avatarUrl
+        from bbs_comment c join tb_user u
+        on c.com_user_id=u.id
+        where c.com_art_id = #{articleId}
+        order by c.com_time desc
+        limit #{begin},#{pageSize};
+    </select>
+    <insert id="add" parameterType="BBSComment">
+        insert into bbs_comment(com_content,com_art_id,com_user_id)
+        values (#{comContent},#{comArtId},#{user.id})
+    </insert>
+</mapper>

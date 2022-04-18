@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hitfriend.dc.mapper.BBSArticleMapper">
+    <resultMap type="BBSArticle" id="baseArticleMap">
+        <id column="art_id" property="artId"></id>
+        <result column="art_user_id" property="user.id"></result>
+        <result column="art_title" property="artTitle"></result>
+        <result column="art_type_id" property="artType"></result>
+        <result column="art_content" property="artContent"></result>
+        <result column="art_cre_time" property="artCreTIme"></result>
+        <result column="art_view" property="artView"></result>
+        <result column="art_like_num" property="artLikeNum"></result>
+        <result column="art_Img_Url" property="artImgUrl"></result>
+        <result column="avatarUrl" property="user.avatarUrl"></result>
+        <result column="nickName" property="user.nickName"></result>
+    </resultMap>
+    <!--  发表文章  -->
+    <insert id="add" parameterType="BBSArticle">
+        insert into bbs_article(art_user_id,art_title,art_type_id,art_content,art_Img_Url)
+        values (#{user.id},#{artTitle},#{artType},#{artContent},#{artImgUrl})
+    </insert>
+    <!--  通过id查找文章  -->
+    <select id="findArticleById" resultMap="baseArticleMap">
+        select a.art_id,a.art_user_id,a.art_title,a.art_type_id,a.art_content,
+               a.art_cre_time,a.art_view,a.art_like_num,a.art_Img_Url,
+                u.avatarUrl,u.nickName
+        from bbs_article a join tb_user u on a.art_user_id = u.id
+
+        where art_id = #{id}
+    </select>
+    <!--    分页查找新闻数据-->
+    <select id="getArticleByKeyword" resultMap="baseArticleMap">
+        <bind name="keywords" value="'%' + keyword + '%'"/>
+        select a.art_id,a.art_user_id,a.art_title,a.art_type_id,a.art_content,
+               a.art_cre_time,a.art_view,a.art_like_num,a.art_Img_Url,
+        u.avatarUrl,u.nickName
+        from bbs_article a join tb_user u on u.id = a.art_user_id
+        <where>
+            <if test="keyword != '' ">
+                a.art_title like #{keywords} or
+                a.art_content like #{keywords}
+            </if>
+            <if test="type !=0">
+                and a.art_type_id=#{type}
+            </if>
+        </where>
+        order by a.art_cre_time desc
+        limit #{begin},#{pageSize};
+    </select>
+    <select id="getArticleByKeywordCount" resultType="int">
+        <bind name="keywords" value="'%'+keyword+'%'"/>
+        select count(*)
+        from bbs_article
+        <where>
+            <if test="keyword != '' ">
+                art_title like #{keywords} or
+                art_content like #{keywords}
+            </if>
+            <if test="type !=0">
+                and art_type_id=#{type}
+            </if>
+        </where>
+
+    </select>
+</mapper>
